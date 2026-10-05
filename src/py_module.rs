@@ -392,7 +392,8 @@ impl PyStreamableParser {
 }
 
 /// Python module definition.
-#[pymodule]
+// Preserve the existing GIL requirement until free-threaded behavior is validated.
+#[pymodule(gil_used = true)]
 fn openai_harmony(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Register the PyHarmonyEncoding class.
     m.add_class::<PyHarmonyEncoding>()?;
@@ -411,7 +412,7 @@ fn openai_harmony(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Convenience functions to get the tool configs for the browser and python tools.
     #[pyfunction]
-    fn get_tool_namespace_config(py: Python<'_>, tool: &str) -> PyResult<PyObject> {
+    fn get_tool_namespace_config(py: Python<'_>, tool: &str) -> PyResult<Py<PyAny>> {
         let cfg = match tool {
             "browser" => ToolNamespaceConfig::browser(),
             "python" => ToolNamespaceConfig::python(),
