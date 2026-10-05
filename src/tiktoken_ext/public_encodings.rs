@@ -467,15 +467,15 @@ fn resolve_cache_dir() -> Result<PathBuf, RemoteVocabFileError> {
     // on the same system until we can validate the correctness wrt the python
     // implementation and write tests to avoid regressions
     let cache_dir_override = std::env::var("TIKTOKEN_RS_CACHE_DIR").ok();
-    if let Some(cache_dir_override) = cache_dir_override {
-        Ok(PathBuf::from(cache_dir_override))
+    let cache_dir = if let Some(cache_dir_override) = cache_dir_override {
+        PathBuf::from(cache_dir_override)
     } else {
-        let cache_dir = std::env::temp_dir().join("tiktoken-rs-cache");
-        std::fs::create_dir_all(&cache_dir).map_err(|e| {
-            RemoteVocabFileError::IOError(format!("creating cache dir {cache_dir:?}"), e)
-        })?;
-        Ok(cache_dir)
-    }
+        std::env::temp_dir().join("tiktoken-rs-cache")
+    };
+    std::fs::create_dir_all(&cache_dir).map_err(|e| {
+        RemoteVocabFileError::IOError(format!("creating cache dir {cache_dir:?}"), e)
+    })?;
+    Ok(cache_dir)
 }
 
 fn resolve_cache_path(cache_dir: &Path, url: &str) -> PathBuf {
