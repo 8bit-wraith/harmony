@@ -356,8 +356,11 @@ pub async fn load_harmony_encoding(
     let parsed: HarmonyEncodingName = name
         .parse::<HarmonyEncodingName>()
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    let encoding =
-        inner_load_harmony_encoding(parsed).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    #[cfg(target_arch = "wasm32")]
+    let encoding = inner_load_harmony_encoding(parsed).await;
+    #[cfg(not(target_arch = "wasm32"))]
+    let encoding = inner_load_harmony_encoding(parsed);
+    let encoding = encoding.map_err(|e| JsValue::from_str(&e.to_string()))?;
     Ok(JsHarmonyEncoding { inner: encoding })
 }
 

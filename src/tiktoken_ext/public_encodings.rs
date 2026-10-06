@@ -390,6 +390,27 @@ where
     load_tiktoken_vocab(reader, expected_hash)
 }
 
+#[cfg(target_arch = "wasm32")]
+fn load_encoding_from_bytes<S, TS>(
+    bytes: &[u8],
+    expected_hash: Option<&str>,
+    special_tokens: S,
+    pattern: &str,
+) -> Result<CoreBPE, LoadError>
+where
+    S: IntoIterator<Item = (TS, Rank)>,
+    TS: Into<String>,
+{
+    let encoder = load_tiktoken_vocab(std::io::Cursor::new(bytes), expected_hash)
+        .map_err(LoadError::InvalidTiktokenVocabFile)?;
+    CoreBPE::new(
+        encoder,
+        special_tokens.into_iter().map(|(k, v)| (k.into(), v)),
+        pattern,
+    )
+    .map_err(LoadError::CoreBPECreationFailed)
+}
+
 pub fn load_encoding_from_file<P, S, TS>(
     file_path: P,
     expected_hash: Option<&str>,
