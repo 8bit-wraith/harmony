@@ -328,7 +328,8 @@ function useTokens(text: string | undefined) {
     const tokens = Array.from(encoding.encode(text, encoding.specialTokens()));
     // @ts-ignore
     const tokenTexts = tokens.map((t) => encoding.decodeUtf8([t]));
-    const parser = new JsStreamableParser(encoding, "user");
+    // The input includes its start token and role, unlike a completion prefix.
+    const parser = new JsStreamableParser(encoding);
     for (const token of tokens) {
       parser.process(token);
     }

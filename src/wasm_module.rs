@@ -259,16 +259,21 @@ impl JsStreamableParser {
     #[wasm_bindgen(constructor)]
     pub fn new(
         encoding: &JsHarmonyEncoding,
-        role: &str,
+        role: Option<String>,
         strict: Option<bool>,
     ) -> Result<JsStreamableParser, JsValue> {
-        let parsed_role = Role::try_from(role)
-            .map_err(|_| JsValue::from_str(&format!("unknown role: {role}")))?;
+        let parsed_role = role
+            .as_deref()
+            .map(|role| {
+                Role::try_from(role)
+                    .map_err(|_| JsValue::from_str(&format!("unknown role: {role}")))
+            })
+            .transpose()?;
         let options = ParseOptions {
             strict: strict.unwrap_or(true),
         };
         let inner =
-            StreamableParser::new_with_options(encoding.inner.clone(), Some(parsed_role), options)
+            StreamableParser::new_with_options(encoding.inner.clone(), parsed_role, options)
                 .map_err(|e| JsValue::from_str(&e.to_string()))?;
         Ok(Self { inner })
     }

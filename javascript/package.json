@@ -2,6 +2,9 @@
   "name": "@openai/harmony",
   "version": "0.0.1",
   "type": "module",
+  "scripts": {
+    "test:wasm": "node --test tests/streamable-parser.test.mjs"
+  },
   "files": [
     "README.md",
     "dist/"
